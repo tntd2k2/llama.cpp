@@ -14,7 +14,7 @@ from .base import MmprojModel, ModelBase, TextModel, gguf, logger
 from .qwen import QwenModel
 
 
-@ModelBase.register("DeepseekOCRForCausalLM")
+@ModelBase.register("DeepseekOCRForCausalLM", "UnlimitedOCRForCausalLM")
 class DeepseekOCRVisionModel(MmprojModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -209,6 +209,7 @@ class DeepseekModel(TextModel):
     "DeepseekV3ForCausalLM",
     "KimiVLForConditionalGeneration",
     "KimiK25ForConditionalGeneration",
+    "UnlimitedOCRForCausalLM",
     "YoutuForCausalLM",
     "YoutuVLForConditionalGeneration",
 )
@@ -223,10 +224,12 @@ class DeepseekV2Model(TextModel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         hparams: dict = ModelBase.load_hparams(self.dir_model, is_mistral_format=False)
-        self.origin_hf_arch = hparams.get('architectures', [None])[0]
+        text_config = hparams.get("text_config", {})
+        text_arch = text_config.get("architectures", [None])[0] if isinstance(text_config, dict) else None
+        self.origin_hf_arch = text_arch or hparams.get('architectures', [None])[0]
 
         # special handling for Deepseek OCR
-        if self.origin_hf_arch in ("DeepseekOCRForCausalLM", "DeepseekOCR2ForCausalLM"):
+        if self.origin_hf_arch in ("DeepseekOCRForCausalLM", "DeepseekOCR2ForCausalLM", "UnlimitedOCRForCausalLM"):
             self.model_arch = gguf.MODEL_ARCH.DEEPSEEK2OCR
             self.gguf_writer.arch = gguf.MODEL_ARCH_NAMES[self.model_arch]
             self.gguf_writer.add_architecture()
