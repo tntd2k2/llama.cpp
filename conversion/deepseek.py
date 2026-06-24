@@ -203,6 +203,8 @@ class DeepseekModel(TextModel):
 
 
 @ModelBase.register(
+    "DeepseekOCR2ForCausalLM",
+    "DeepseekOCRForCausalLM",
     "DeepseekV2ForCausalLM",
     "DeepseekV3ForCausalLM",
     "KimiVLForConditionalGeneration",
